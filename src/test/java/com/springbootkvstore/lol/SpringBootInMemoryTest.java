@@ -1,4 +1,4 @@
-package com.springbootwebcsocket.demo;
+package com.springbootkvstore.lol;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

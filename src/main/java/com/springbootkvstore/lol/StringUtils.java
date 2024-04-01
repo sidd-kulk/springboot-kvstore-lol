@@ -1,4 +1,4 @@
-package com.springbootwebcsocket.demo;
+package com.springbootkvstore.lol;
 
 import java.util.Arrays;
 
