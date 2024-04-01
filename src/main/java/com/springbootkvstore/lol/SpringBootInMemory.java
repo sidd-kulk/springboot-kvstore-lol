@@ -49,7 +49,7 @@ public class SpringBootInMemory {
     public ResponseEntity<String> getAll() {
         Collection<String> all = kvStore.all();
         return new ResponseEntity<>(
-                "Size = " + all.size(),
+                String.join(", ", all),
                 HttpStatus.OK);
     }
 

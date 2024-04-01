@@ -22,34 +22,36 @@ class SpringBootInMemoryTest {
 
     @Test
     void testSetGetAndGetAll() throws Exception {
-        String key = "testKey";
-        String value = "testValue";
 
+        performAdd("key", "value")
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().string("Success"));
 
-        performGet(key, value)
+        performAdd("key1", "value1")
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().string("Success"));
 
         mvc.perform(MockMvcRequestBuilders.get("/set")
-                        .param("key", key))
+                        .param("key", "key"))
                 .andExpect(MockMvcResultMatchers.status().is4xxClientError());
 
         mvc.perform(MockMvcRequestBuilders.get("/set")
-                        .param("val", value))
+                        .param("val", "value"))
                 .andExpect(MockMvcResultMatchers.status().is4xxClientError());
 
 
         mvc.perform(MockMvcRequestBuilders.get("/get")
-                        .param("key", key))
+                        .param("key", "key"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().string(value));
+                .andExpect(MockMvcResultMatchers.content().string("value"));
+
 
         mvc.perform(MockMvcRequestBuilders.get("/get-all"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().string("Size = "+1));
+                .andExpect(MockMvcResultMatchers.content().string("key1=value1, key=value"));
     }
 
-    private ResultActions performGet(String key, String value) throws Exception {
+    private ResultActions performAdd(String key, String value) throws Exception {
         return mvc.perform(MockMvcRequestBuilders.get("/set")
                 .param("key", key)
                 .param("val", value));
