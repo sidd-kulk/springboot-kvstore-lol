@@ -7,7 +7,8 @@ Internally uses ConcurrentHashMap.  Under the hood it uses CAS operations to ens
 Todo:
 - Concurrency tests
 - More unnecessary features
-- GitHub Actions integration
+- GitHub Actions integration - Done
+- Refactoring get-all operation - Done
 - Memory profiling
 
 
