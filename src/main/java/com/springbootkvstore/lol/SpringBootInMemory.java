@@ -28,10 +28,14 @@ public class SpringBootInMemory {
             return ResponseEntity.badRequest().build();
         }
 
-        kvStore.add(key, val);
-        return new ResponseEntity<>(
-                "Success",
-                HttpStatus.OK);
+        if (kvStore.add(key, val)) {
+            return new ResponseEntity<>(
+                    "Success",
+                    HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("Cache is full", HttpStatus.FAILED_DEPENDENCY);
+        }
+
     }
 
     @GetMapping("/get")

@@ -9,6 +9,8 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.util.stream.IntStream;
+
 @SpringBootTest
 @AutoConfigureMockMvc
 class SpringBootInMemoryTest {
@@ -49,6 +51,20 @@ class SpringBootInMemoryTest {
         mvc.perform(MockMvcRequestBuilders.get("/get-all"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().string("key1=value1, key=value"));
+    }
+
+    @Test
+    void testSetGetAndGetAllCacheFull() throws Exception {
+        IntStream.range(1, 1001).forEach(i -> {
+            try {
+                performAdd(String.valueOf(i), String.valueOf(i));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        performAdd("key1", "value1")
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
     }
 
     private ResultActions performAdd(String key, String value) throws Exception {

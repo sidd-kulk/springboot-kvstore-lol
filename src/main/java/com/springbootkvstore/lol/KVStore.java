@@ -10,13 +10,26 @@ import java.util.stream.Collectors;
 @Service
 public class KVStore<K, V> {
     private final Map<K, V> map = new ConcurrentHashMap<>();
+    private int maxSize;
+
+    public KVStore(int maxSize) {
+        this.maxSize = maxSize;
+    }
+
+    public KVStore() {
+        this.maxSize = 1000;
+    }
 
     public V get(K key) {
         return map.get(key);
     }
 
-    public void add(K key, V val) {
+    public boolean add(K key, V val) {
+        if (map.size() >= maxSize) {
+            return false;
+        }
         map.put(key, val);
+        return true;
     }
 
     public Collection<String> all() {
