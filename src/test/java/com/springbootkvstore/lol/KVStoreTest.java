@@ -17,7 +17,7 @@ class KVStoreTest {
     @Test
     void get() {
         kvStore.add("key", "value");
-        assertEquals("value", kvStore.get("key1"));
+        assertEquals("value", kvStore.get("key"));
     }
 
     @Test
