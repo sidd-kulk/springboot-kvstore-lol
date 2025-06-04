@@ -5,17 +5,19 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 
 @SpringBootApplication
-@RestController
+@Controller
 public class SpringBootInMemory {
 
     private static final Logger log = LoggerFactory.getLogger(SpringBootInMemory.class);
@@ -29,6 +31,7 @@ public class SpringBootInMemory {
     private KVStore<String, String> kvStore;
 
     @PostMapping("/set")
+    @ResponseBody
     public ResponseEntity<String> set(@RequestParam String key, @RequestParam String val) {
         if (StringUtils.isAnyNullOrBlank(key, val)) {
             log.warn("/set called with invalid parameters key='{}' val='{}'", key, val);
@@ -48,6 +51,7 @@ public class SpringBootInMemory {
     }
 
     @GetMapping("/get")
+    @ResponseBody
     public ResponseEntity<String> get(@RequestParam String key) {
         if (key == null) {
             log.warn("/get called with null key");
@@ -62,6 +66,7 @@ public class SpringBootInMemory {
     }
 
     @GetMapping("/get-all")
+    @ResponseBody
     public ResponseEntity<String> getAll() {
         Collection<String> all = kvStore.all();
         log.info("Returning all entries, count={}", all.size());
@@ -70,7 +75,14 @@ public class SpringBootInMemory {
                 HttpStatus.OK);
     }
 
+    @GetMapping("/view")
+    public String view(Model model) {
+        model.addAttribute("entries", kvStore.asMap());
+        return "view";
+    }
+
     @PostMapping("/delete")
+    @ResponseBody
     public ResponseEntity<String> delete(@RequestParam String key) {
         if (StringUtils.isAnyNullOrBlank(key)) {
             log.warn("/delete called with invalid key='{}'", key);

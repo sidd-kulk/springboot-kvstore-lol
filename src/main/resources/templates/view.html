@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>KV Store</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2em; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { padding: 8px 12px; border: 1px solid #ccc; }
+        th { background: #f0f0f0; }
+        form { margin-bottom: 1em; }
+        .actions { text-align: right; }
+        button { padding: 4px 8px; }
+    </style>
+</head>
+<body>
+<h1>Key Value Pairs</h1>
+<form id="add-form">
+    <input type="text" name="key" placeholder="Key" required>
+    <input type="text" name="val" placeholder="Value" required>
+    <button type="submit">Add / Update</button>
+</form>
+<table>
+    <tr><th>Key</th><th>Value</th><th class="actions">Actions</th></tr>
+    <tr th:each="entry : ${entries.entrySet()}">
+        <td th:text="${entry.key}"></td>
+        <td th:text="${entry.value}"></td>
+        <td class="actions">
+            <button type="button" th:attr="data-key=${entry.key}" onclick="deleteEntry(this)">Delete</button>
+        </td>
+    </tr>
+</table>
+<script>
+    document.getElementById('add-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        await fetch('/set', { method: 'POST', body: new URLSearchParams(formData) });
+        location.reload();
+    });
+    async function deleteEntry(btn) {
+        const key = btn.getAttribute('data-key');
+        const data = new URLSearchParams();
+        data.append('key', key);
+        await fetch('/delete', { method: 'POST', body: data });
+        location.reload();
+    }
+</script>
+</body>
+</html>
