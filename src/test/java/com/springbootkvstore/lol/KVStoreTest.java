@@ -36,4 +36,13 @@ class KVStoreTest {
         assertEquals("value", kvStore.get("key"));
         assertNull(kvStore.get("key1"));
     }
+
+    @Test
+    void testUpdateWhenFull(){
+        kvStore = new KVStore<>(1);
+        assertTrue(kvStore.add("key", "value"));
+        // store is full now but updating existing key should still succeed
+        assertTrue(kvStore.add("key", "newValue"));
+        assertEquals("newValue", kvStore.get("key"));
+    }
 }

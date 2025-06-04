@@ -67,6 +67,26 @@ class SpringBootInMemoryTest {
                 .andExpect(MockMvcResultMatchers.status().is4xxClientError());
     }
 
+    @Test
+    void testUpdateExistingWhenFull() throws Exception {
+        IntStream.range(1, 1001).forEach(i -> {
+            try {
+                performAdd(String.valueOf(i), String.valueOf(i));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        performAdd("500", "new")
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().string("Success"));
+
+        mvc.perform(MockMvcRequestBuilders.get("/get")
+                        .param("key", "500"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().string("new"));
+    }
+
     private ResultActions performAdd(String key, String value) throws Exception {
         return mvc.perform(MockMvcRequestBuilders.get("/set")
                 .param("key", key)
