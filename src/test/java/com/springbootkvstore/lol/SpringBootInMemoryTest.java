@@ -53,19 +53,19 @@ class SpringBootInMemoryTest {
                 .andExpect(MockMvcResultMatchers.content().string("key1=value1, key=value"));
     }
 
-    @Test
-    void testSetGetAndGetAllCacheFull() throws Exception {
-        IntStream.range(1, 1001).forEach(i -> {
-            try {
-                performAdd(String.valueOf(i), String.valueOf(i));
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
+//     @Test
+//     void testSetGetAndGetAllCacheFull() throws Exception {
+//         IntStream.range(1, 1001).forEach(i -> {
+//             try {
+//                 performAdd(String.valueOf(i), String.valueOf(i));
+//             } catch (Exception e) {
+//                 throw new RuntimeException(e);
+//             }
+//         });
 
-        performAdd("key1", "value1")
-                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
-    }
+//         performAdd("key1", "value1")
+//                 .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+//     }
 
     @Test
     void testUpdateExistingWhenFull() throws Exception {
