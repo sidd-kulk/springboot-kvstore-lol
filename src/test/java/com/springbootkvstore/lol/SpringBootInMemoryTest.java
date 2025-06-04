@@ -33,11 +33,11 @@ class SpringBootInMemoryTest {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().string("Success"));
 
-        mvc.perform(MockMvcRequestBuilders.get("/set")
+        mvc.perform(MockMvcRequestBuilders.post("/set")
                         .param("key", "key"))
                 .andExpect(MockMvcResultMatchers.status().is4xxClientError());
 
-        mvc.perform(MockMvcRequestBuilders.get("/set")
+        mvc.perform(MockMvcRequestBuilders.post("/set")
                         .param("val", "value"))
                 .andExpect(MockMvcResultMatchers.status().is4xxClientError());
 
@@ -88,7 +88,7 @@ class SpringBootInMemoryTest {
     }
 
     private ResultActions performAdd(String key, String value) throws Exception {
-        return mvc.perform(MockMvcRequestBuilders.get("/set")
+        return mvc.perform(MockMvcRequestBuilders.post("/set")
                 .param("key", key)
                 .param("val", value));
     }
