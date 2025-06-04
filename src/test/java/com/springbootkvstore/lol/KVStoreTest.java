@@ -5,6 +5,11 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
+
 class KVStoreTest {
 
     private KVStore<String, String> kvStore;
@@ -44,5 +49,20 @@ class KVStoreTest {
         // store is full now but updating existing key should still succeed
         assertTrue(kvStore.add("key", "newValue"));
         assertEquals("newValue", kvStore.get("key"));
+    }
+
+    @Test
+    void testConcurrentAddDoesNotExceedMaxSize() throws InterruptedException {
+        int max = 50;
+        kvStore = new KVStore<>(max);
+
+        ExecutorService executor = Executors.newFixedThreadPool(10);
+        IntStream.range(0, max * 2).forEach(i ->
+                executor.submit(() -> kvStore.add("k" + i, "v" + i))
+        );
+        executor.shutdown();
+        assertTrue(executor.awaitTermination(1, TimeUnit.MINUTES));
+
+        assertTrue(kvStore.all().size() <= max);
     }
 }
