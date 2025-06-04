@@ -4,6 +4,11 @@ import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,13 +19,21 @@ public class KVStore<K, V> {
     private static final Logger log = LoggerFactory.getLogger(KVStore.class);
     private final Map<K, V> map = new ConcurrentHashMap<>();
     private int maxSize;
+    private static final String DEFAULT_FILE = "kvstore.ser";
+    private final Path persistencePath;
+
+    public KVStore(int maxSize, String persistenceFilePath) {
+        this.maxSize = maxSize;
+        this.persistencePath = Path.of(persistenceFilePath);
+        loadFromDisk();
+    }
 
     public KVStore(int maxSize) {
-        this.maxSize = maxSize;
+        this(maxSize, DEFAULT_FILE);
     }
 
     public KVStore() {
-        this.maxSize = 1000;
+        this(1000, DEFAULT_FILE);
     }
 
     public V get(K key) {
@@ -41,6 +54,7 @@ public class KVStore<K, V> {
         }
         map.put(key, val);
         log.debug("Added {}={}", key, val);
+        persistToDisk();
         return true;
     }
 
@@ -48,6 +62,7 @@ public class KVStore<K, V> {
         if (map.containsKey(key)) {
             map.remove(key);
             log.debug("Deleted key {}", key);
+            persistToDisk();
             return true;
         }
         log.warn("Key {} not found for deletion", key);
@@ -60,6 +75,30 @@ public class KVStore<K, V> {
 
     public Map<K, V> asMap() {
         return Map.copyOf(map);
+    }
+
+    private void loadFromDisk() {
+        if (persistencePath != null && Files.exists(persistencePath)) {
+            try (ObjectInputStream in = new ObjectInputStream(Files.newInputStream(persistencePath))) {
+                Object obj = in.readObject();
+                if (obj instanceof Map<?, ?> m) {
+                    //noinspection unchecked
+                    map.putAll((Map<K, V>) m);
+                }
+            } catch (IOException | ClassNotFoundException e) {
+                log.warn("Failed to load persisted data", e);
+            }
+        }
+    }
+
+    private void persistToDisk() {
+        if (persistencePath != null) {
+            try (ObjectOutputStream out = new ObjectOutputStream(Files.newOutputStream(persistencePath))) {
+                out.writeObject(map);
+            } catch (IOException e) {
+                log.warn("Failed to persist data", e);
+            }
+        }
     }
 
     @Override
