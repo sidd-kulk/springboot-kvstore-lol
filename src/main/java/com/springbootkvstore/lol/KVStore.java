@@ -58,6 +58,10 @@ public class KVStore<K, V> {
         return map.entrySet().stream().map(e -> e.getKey() + "=" + e.getValue()).collect(Collectors.toList());
     }
 
+    public Map<K, V> asMap() {
+        return Map.copyOf(map);
+    }
+
     @Override
     public String toString() {
         return String.join(", ", this.all());
