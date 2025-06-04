@@ -44,6 +44,16 @@ public class KVStore<K, V> {
         return true;
     }
 
+    public synchronized boolean delete(K key) {
+        if (map.containsKey(key)) {
+            map.remove(key);
+            log.debug("Deleted key {}", key);
+            return true;
+        }
+        log.warn("Key {} not found for deletion", key);
+        return false;
+    }
+
     public Collection<String> all() {
         return map.entrySet().stream().map(e -> e.getKey() + "=" + e.getValue()).collect(Collectors.toList());
     }

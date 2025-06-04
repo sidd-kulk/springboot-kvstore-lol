@@ -52,6 +52,14 @@ class KVStoreTest {
     }
 
     @Test
+    void testDelete() {
+        kvStore.add("key", "value");
+        assertTrue(kvStore.delete("key"));
+        assertNull(kvStore.get("key"));
+        assertFalse(kvStore.delete("missing"));
+    }
+
+    @Test
     void testConcurrentAddDoesNotExceedMaxSize() throws InterruptedException {
         int max = 50;
         kvStore = new KVStore<>(max);

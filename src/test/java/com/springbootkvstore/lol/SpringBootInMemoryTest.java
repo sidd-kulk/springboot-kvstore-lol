@@ -87,9 +87,27 @@ class SpringBootInMemoryTest {
                 .andExpect(MockMvcResultMatchers.content().string("new"));
     }
 
+    @Test
+    void testDelete() throws Exception {
+        performAdd("key", "value")
+                .andExpect(MockMvcResultMatchers.status().isOk());
+
+        performDelete("key")
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().string("Success"));
+
+        performDelete("missing")
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
     private ResultActions performAdd(String key, String value) throws Exception {
         return mvc.perform(MockMvcRequestBuilders.post("/set")
                 .param("key", key)
                 .param("val", value));
+    }
+
+    private ResultActions performDelete(String key) throws Exception {
+        return mvc.perform(MockMvcRequestBuilders.post("/delete")
+                .param("key", key));
     }
 }
