@@ -25,7 +25,8 @@ public class KVStore<K, V> {
     }
 
     public boolean add(K key, V val) {
-        if (map.size() >= maxSize) {
+        // allow updates to existing keys even when the store reached its max size
+        if (!map.containsKey(key) && map.size() >= maxSize) {
             return false;
         }
         map.put(key, val);
