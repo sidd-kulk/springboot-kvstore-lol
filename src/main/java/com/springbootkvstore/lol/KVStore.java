@@ -24,10 +24,16 @@ public class KVStore<K, V> {
         return map.get(key);
     }
 
-    public boolean add(K key, V val) {
+    public synchronized boolean add(K key, V val) {
+        if (map.containsKey(key)) {
+            map.put(key, val);
+            return true;
+        }
+
         if (map.size() >= maxSize) {
             return false;
         }
+
         map.put(key, val);
         return true;
     }

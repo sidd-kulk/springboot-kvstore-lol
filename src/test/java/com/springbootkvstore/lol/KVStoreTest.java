@@ -36,4 +36,22 @@ class KVStoreTest {
         assertEquals("value", kvStore.get("key"));
         assertNull(kvStore.get("key1"));
     }
+
+    @Test
+    void testConcurrentAddRespectMaxSize() throws InterruptedException {
+        kvStore = new KVStore<>(1);
+
+        Runnable addTask = () -> kvStore.add("key1", "value1");
+
+        Thread t1 = new Thread(addTask);
+        Thread t2 = new Thread(addTask);
+
+        t1.start();
+        t2.start();
+
+        t1.join();
+        t2.join();
+
+        assertEquals(1, kvStore.all().size());
+    }
 }
