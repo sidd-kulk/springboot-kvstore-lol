@@ -17,6 +17,7 @@ Todo:
 /set?key=key&val=val
 /get?key-key
 /get-all
+/delete?key=key
 </code>
 
 ### Why?

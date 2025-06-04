@@ -70,5 +70,21 @@ public class SpringBootInMemory {
                 HttpStatus.OK);
     }
 
+    @PostMapping("/delete")
+    public ResponseEntity<String> delete(@RequestParam String key) {
+        if (StringUtils.isAnyNullOrBlank(key)) {
+            log.warn("/delete called with invalid key='{}'", key);
+            return ResponseEntity.badRequest().build();
+        }
+
+        if (kvStore.delete(key)) {
+            log.info("Deleted key {}", key);
+            return new ResponseEntity<>("Success", HttpStatus.OK);
+        } else {
+            log.warn("Key {} not found for delete", key);
+            return new ResponseEntity<>("Key not found", HttpStatus.NOT_FOUND);
+        }
+    }
+
 
 }
