@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>KV Store</title>
+</head>
+<body>
+<h1>Key Value Pairs</h1>
+<table>
+    <tr><th>Key</th><th>Value</th></tr>
+    <tr th:each="entry : ${entries.entrySet()}">
+        <td th:text="${entry.key}"></td>
+        <td th:text="${entry.value}"></td>
+    </tr>
+</table>
+</body>
+</html>
