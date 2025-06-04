@@ -12,6 +12,10 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,6 +25,14 @@ public class KVStore<K, V> {
     private int maxSize;
     private static final String DEFAULT_FILE = "kvstore.ser";
     private final Path persistencePath;
+    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
+        Thread t = new Thread(r);
+        t.setDaemon(true);
+        t.setName("kvstore-persistence");
+        return t;
+    });
+    private final Object persistLock = new Object();
+    private ScheduledFuture<?> scheduledPersist;
 
     public KVStore(int maxSize, String persistenceFilePath) {
         this.maxSize = maxSize;
@@ -54,7 +66,7 @@ public class KVStore<K, V> {
         }
         map.put(key, val);
         log.debug("Added {}={}", key, val);
-        persistToDisk();
+        schedulePersist();
         return true;
     }
 
@@ -62,7 +74,7 @@ public class KVStore<K, V> {
         if (map.containsKey(key)) {
             map.remove(key);
             log.debug("Deleted key {}", key);
-            persistToDisk();
+            schedulePersist();
             return true;
         }
         log.warn("Key {} not found for deletion", key);
@@ -99,6 +111,29 @@ public class KVStore<K, V> {
                 log.warn("Failed to persist data", e);
             }
         }
+    }
+
+    private void schedulePersist() {
+        synchronized (persistLock) {
+            if (scheduledPersist != null && !scheduledPersist.isDone()) {
+                scheduledPersist.cancel(false);
+            }
+            scheduledPersist = scheduler.schedule(this::persistToDisk, 100, TimeUnit.MILLISECONDS);
+        }
+    }
+
+    public void flush() {
+        synchronized (persistLock) {
+            if (scheduledPersist != null && !scheduledPersist.isDone()) {
+                scheduledPersist.cancel(false);
+            }
+        }
+        persistToDisk();
+    }
+
+    public void close() {
+        flush();
+        scheduler.shutdown();
     }
 
     @Override
